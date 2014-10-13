@@ -1,6 +1,6 @@
 module.exports = [{
   identity: 'icode',
-  connection: 'myLocalDisk',
+  connection: 'mongo',
 
   attributes: {
     code: 'string'
