@@ -1,5 +1,5 @@
 var uuid = require('node-uuid'),
-  q = require('q')
+  Promise = require('bluebird')
 
 module.exports = {
   deps : ['mail','user','model','bus','rest'],
@@ -11,18 +11,18 @@ module.exports = {
       root.listen = {
         'user.register.before' : function checkInviteCode(params){
           var bus = this
-          console.log( params)
           if( !params.inviteCode ){
             return bus.error(406,'icode missing')
           }else{
             //Notice, we need to return a reject promise in fail to keep the chain failed.
-            return root.verify(params.inviteCode,params.inviteIdentity).fail(function(){
-              return q.reject( bus.error(406,'icode not match').status )
+            return root.verify(params.inviteCode,params.inviteIdentity).catch(function(){
+              return Promise.reject( bus.error(406,'icode not match').status )
             })
           }
         },
         'user.register.after' : function destroyInviteCode( params){
           var bus = this
+          ZERO.mlog("invite","user register succes", params)
           if( params.inviteCode ){
             return root.destroy(params.inviteCode)
           }else{
@@ -40,29 +40,29 @@ module.exports = {
   },
   pop : function( identity ){
     var root = this
-    return q.Promise(function( resolve, reject){
+    return  new Promise(function( resolve, reject){
         root.dep.model.models['icode'].find({limit:1,verifying:false}).then(function( codes){
-          codes[0] ? root.dep.model.models['icode'].update({id:codes[0].id},{verifying:true,identity:identity}).then(function(){ resolve(codes[0])}).fail(reject) : reject()
-        }).fail(reject)
+          codes[0] ? root.dep.model.models['icode'].update({id:codes[0].id},{verifying:true,identity:identity}).then(function(){ resolve(codes[0])}).catch(reject) : reject()
+        }).catch(reject)
     })
   },
   verify : function( code, identity ){
     var root= this
-    return q.Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
       root.dep.model.models['icode'].findOne({code:code,identity:identity}).then(function (codeObj) {
         console.log( "verifing", code, identity, codeObj )
 
         codeObj ? resolve(codeObj) : reject()
-      }).fail(reject)
+      }).catch(reject)
     })
   },
   destroy : function( code ) {
     var root = this
-    return q.Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
       root.dep.model.models['icode'].destroy({code: code}).then(function (codes) {
         console.log("destroing icode!!!!", codes[0] ? " resolve" : "reject")
         codes[0] ? resolve(codes[0]) : reject()
-      }).fail(reject)
+      }).catch(reject)
     })
   }
 }
