@@ -1,9 +1,9 @@
 module.exports = [{
-    identity: 'user',
-    connection: 'localDisk',
+  identity: 'icode',
+  connection: 'localDisk',
 
-    attributes: {
-      name: 'string'
-    },
-    rest : true
-  }]
+  attributes: {
+    code: 'string'
+  },
+  rest : true
+}]
