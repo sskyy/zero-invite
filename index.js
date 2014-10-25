@@ -59,7 +59,6 @@ module.exports = {
     var root = this
     return new Promise(function (resolve, reject) {
       root.dep.model.models['icode'].destroy({code: code}).then(function (codes) {
-        console.log("destroing icode!!!!", codes[0] ? " resolve" : "reject")
         codes[0] ? resolve(codes[0]) : reject()
       }).catch(reject)
     })
